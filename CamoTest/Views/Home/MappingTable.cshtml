@@ -1,0 +1,177 @@
+﻿@model CamoTest.ViewModels.MappingTableVM
+
+@{
+    ViewBag.Title = "MappingTable";
+}
+
+<h2>MappingTable</h2>
+<div>
+    @Html.DisplayTextFor(m => m.DisplayFileName)
+    @Html.HiddenFor(m => m.RequestId)
+</div>
+<div class="validation-summary-errors">
+    @Html.DisplayTextFor(m => m.HeaderErrors)
+</div>
+<div id="errorField" class="validation-summary-errors">
+    
+</div>
+<div>
+    <table class="table table-hover table-bordered">
+        <thead>
+            <tr>
+                @foreach (var item in Model.Headers)
+                {
+                    <th>@item</th>
+                }
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model.TableItemsVM)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@Html.DropDownList("paraneter_" + item.Name, item.SelectListItems)</td>
+                    <td>@item.ValueExamples</td>
+                    <td>@item.Errors</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="button-block">
+        <input type="button" value="Upload" id="upload" class="btn btn-primary" />
+        <input type="button" value="Check" id="check" class="btn btn-primary" />
+        <input type="button" value="Cancel" onclick="location.href='/'" class="btn btn-default" />
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            var uploadBtn = $('#upload')
+
+            var checkBtn = $('#check');
+
+            var selectors = $('select');
+
+            var errorField = $('#errorField');
+
+            var selectorsValues = [];
+
+
+            selectors.change(function () {
+
+                var flag = true;
+
+                var errorStr = "";
+
+                uploadBtn.hide();
+
+                checkBtn.show();
+
+                checkBtn.attr('disabled', 'disabled');
+
+                selectorsValues = selectors.map(function () { return this.value; }).get();
+
+                if (selectorsValues.includes('0')) {
+                    errorStr += 'Atleast one selector is "NoMapped" ';
+                    flag = false;
+
+                    if (!selectorsValues.includes('1')) {
+                        errorStr += 'One selector has to be "SKU" ';
+                        flag = false;
+                    }
+                    if (!selectorsValues.includes('2')) {
+                        errorStr += 'One selector has to be "Brand" ';
+                        flag = false;
+                    }
+                    if (!selectorsValues.includes('3')) {
+                        errorStr += 'One selector has to be "Price" ';
+                        flag = false;
+                    }
+                }
+                    
+                if (this.value == '0') {
+                    $(this).addClass('select-error');
+                }
+                else {
+                    $(this).removeClass('select-error');
+                }
+                if (['1','2','3','4'].includes(this.value)) {
+                    markNoMapped(this);
+                }
+                errorField.text(errorStr);
+                if (flag) {
+                    checkBtn.removeAttr('disabled');
+                }
+                
+            }).trigger('change');
+
+            function markNoMapped(element) {
+                var value = element.value;
+                selectors.not($(element)).each(function () {
+                    if (this.value == value) {
+                        this.value = '0';
+                        $(this).addClass('select-error');
+                    }
+                });
+            };
+
+
+            checkBtn.on('click', function () {
+                $.ajax({
+                    type: "GET",
+                    url: "/api/errors/get",
+                    data: $.param({ selectorsValues: selectorsValues, requestId: $('#RequestId').val() }, true),
+                    
+                    statusCode: {
+                        404: function () {
+                            alert('Something wrong');
+                            window.location.href = "/";
+                        },
+                        200: function (response) {
+                            var errorTds = $("tbody tr td:nth-child(4)")
+                            for (var i = 0; i < errorTds.length; i++) {
+                                errorTds[i].innerText = response[i];
+                            }
+                        },
+                        204: function () {
+                            uploadBtn.show();
+                            checkBtn.hide();
+                        }
+                    }
+                })
+
+            });
+
+            uploadBtn.on('click', function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/api/errors/get",
+                    data: $.param({ selectorsValues: selectorsValues, requestId: $('#RequestId').val() }, true),
+
+                    statusCode: {
+                        404: function () {
+                            alert('Something wrong');
+                            window.location.href = "/";
+                        },
+                        200: function (response) {
+                            var errorTds = $("tbody tr td:nth-child(4)")
+                            for (var i = 0; i < errorTds.length; i++) {
+                                errorTds[i].innerText = response[i];
+                            }
+                        },
+                        204: function () {
+                            uploadBtn.show();
+                            checkBtn.hide();
+                        }
+                    }
+                })
+            })
+        })
+    </script>
+
+}
+

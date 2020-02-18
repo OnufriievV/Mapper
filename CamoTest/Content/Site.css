@@ -1,0 +1,44 @@
+﻿body {
+    padding: 50px;
+}
+
+.form-item{
+    padding: 10px;
+}
+
+.validation-summary-errors{
+    color: red;
+}
+
+.select-error {
+    border: 3px solid red;
+}
+
+.button-block{
+    text-align: right;
+}
+
+table th:first-child{
+    width: 10%;
+}
+
+table th:nth-child(2) {
+    width: 10%;
+}
+
+table th:nth-child(3) {
+    width: 40%;
+}
+
+td {
+    vertical-align: middle!important;
+}
+
+select {
+    border-radius: 5px;
+}
+
+tbody tr td:nth-child(4){
+    color: red;
+}
+

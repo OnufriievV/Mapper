@@ -1,0 +1,26 @@
+﻿@using CamoTest.Properties
+@{
+    ViewBag.Title = "Upload a file";
+}
+
+<div>
+    <h1>Upload a file</h1>
+</div>
+@using (Html.BeginForm("Upload", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken();
+    <div>
+        <div class="form-item">
+            @Resources.SelectCsvFile:
+            @Html.ValidationSummary()
+        </div>
+        <div class="form-item">
+            <input type="file" accept=".csv" name="file" title="your text"/>
+        </div>
+        <div class="form-item">
+            <input type="submit" , value="Upload" />
+        </div>
+    </div>
+
+}
+
